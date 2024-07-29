@@ -462,8 +462,8 @@ impl PackagesClient {
                         .unwrap()
                         .contains("delete:packages")
                 {
-                    eprintln!("The token does not have the scopes needed. Tokens need `delete:packages`. The scopes found were {}.", response_headers.x_oauth_scopes.unwrap_or("none".to_string()));
-                    exit(1);
+                    info!("The token does not have the scopes needed. Tokens need `delete:packages`. The scopes found were {}.", response_headers.x_oauth_scopes.unwrap_or("none".to_string()));
+                    // exit(1);
                 }
             }
         }
