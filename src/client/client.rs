@@ -454,7 +454,7 @@ impl PackagesClient {
         // auth check: Make sure we have the correct scopes
         match self.token {
             Token::Temporal(_) => (),
-            Token::ClassicPersonalAccess(_) => {
+            Token::Oauth(_) | Token::ClassicPersonalAccess(_) => {
                 if response_headers.x_oauth_scopes.is_none()
                     || !response_headers
                         .x_oauth_scopes

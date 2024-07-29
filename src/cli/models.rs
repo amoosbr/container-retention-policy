@@ -24,6 +24,7 @@ pub enum TagSelection {
 #[derive(Debug, Clone)]
 pub enum Token {
     ClassicPersonalAccess(Secret<String>),
+    Oauth(Secret<String>),
     Temporal(Secret<String>),
 }
 
@@ -44,6 +45,13 @@ impl PartialEq for Token {
                     false
                 }
             }
+            Self::Oauth(a) => {
+                if let Self::Oauth(b) = other {
+                    a.expose_secret() == b.expose_secret()
+                } else {
+                    false
+                }
+            }
         }
     }
 }
@@ -55,16 +63,22 @@ impl Token {
 
         // Classic PAT
         if Regex::new(r"ghp_[a-zA-Z0-9]{36}$").unwrap().is_match(trimmed_value) {
-            debug!("Recognized token as personal access token");
+            debug!("Recognized tokens as personal access token");
             return Ok(Self::ClassicPersonalAccess(secret));
         };
 
-        // Temporal token - i.e., $GITHUB_TOKEN or token acquired for a GitHub app
+        // Temporal token - i.e., $GITHUB_TOKEN
         if Regex::new(r"ghs_[a-zA-Z0-9]{36}$").unwrap().is_match(trimmed_value) {
-            debug!("Recognized token as temporal token");
+            debug!("Recognized tokens as temporal token");
             return Ok(Self::Temporal(secret));
         };
 
+        // GitHub oauth token
+        // TODO: Verify whether a Github app token is an oauth token or not.
+        if Regex::new(r"gho_[a-zA-Z0-9]{36}$").unwrap().is_match(trimmed_value) {
+            debug!("Recognized tokens as oauth token");
+            return Ok(Self::Oauth(secret));
+        };
         Err(
             "The `token` value is not valid. Must be $GITHUB_TOKEN, a classic personal access token (prefixed by 'ghp') or oauth token (prefixed by 'gho').".to_string()
         )
