@@ -37,23 +37,28 @@ impl PackagesClient {
         image_names: &Vec<String>,
         counts: Arc<Counts>,
     ) -> Vec<Package> {
-        if let Token::Temporal(_) = *token {
-            // If a repo is assigned the admin role under Package Settings > Manage Actions Access,
-            // then it can fetch a package's versions directly by name, and delete them. It cannot,
-            // however, list packages, so for this token type we are limited to fetching packages
-            // individually, by name
-            for image_name in image_names {
-                assert!(!(image_name.contains('!') || image_name.contains('*')), "Restrictions in the Github API prevent us from listing packages when using a $GITHUB_TOKEN token. Because of this, filtering with '!' and '*' are not supported for this token type. Image name {image_name} is therefore not valid.");
-            }
-            self.fetch_individual_packages(image_names, counts)
-                .await
-                .expect("Failed to fetch packages")
-        } else {
-            self.list_packages(self.urls.list_packages_url.clone(), counts)
-                .await
-                .expect("Failed to fetch packages")
+        // if let Token::Temporal(_) = *token {
+        //     // If a repo is assigned the admin role under Package Settings > Manage Actions Access,
+        //     // then it can fetch a package's versions directly by name, and delete them. It cannot,
+        //     // however, list packages, so for this token type we are limited to fetching packages
+        //     // individually, by name
+        //     for image_name in image_names {
+        //         assert!(!(image_name.contains('!') || image_name.contains('*')), "Restrictions in the Github API prevent us from listing packages when using a $GITHUB_TOKEN token. Because of this, filtering with '!' and '*' are not supported for this token type. Image name {image_name} is therefore not valid.");
+        //     }
+        //     self.fetch_individual_packages(image_names, counts)
+        //         .await
+        //         .expect("Failed to fetch packages")
+        // } else {
+        //     self.list_packages(self.urls.list_packages_url.clone(), counts)
+        //         .await
+        //         .expect("Failed to fetch packages")
+        // }
+        info!("Fetching packages: {}", image_names.join(", "));
+        debug!("Token: {:?}", token);
+        self.list_packages(self.urls.list_packages_url.clone(), counts)
+            .await
+            .expect("Failed to fetch packages")
         }
-    }
 
     async fn fetch_packages_with_pagination(
         url: Url,
